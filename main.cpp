@@ -6,16 +6,18 @@
 
 
 /// How many individuals a population should be comprised of.
-static const int POPULATION_SIZE = 100;
-
-/// Valid characters for mutations.
-static const std::string CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ";
+static constexpr int POPULATION_SIZE = 100;
 
 /// The target value for the mutations.
 static const std::string TARGET = "Computer Science 1944 Cool Topics Project";
 
 /// The chance for each value to mutate.
-static const double MUTATION_CHANCE = 0.01;
+static constexpr double MUTATION_CHANCE = 0.01;
+
+/// Lambda for generating a pseudo-random character.
+static constexpr auto random_char = []() -> char {
+    return rand() % CHAR_MAX;
+};
 
 
 /**
@@ -36,14 +38,13 @@ double fitness(const std::string &individual) {
         }
     }
 
-    return (double) matches / (double) individual.length();
+    return static_cast<double>(matches) / static_cast<double>(individual.length());
 
 }
 
 
 /**
- * Attempts to mutate characters within a string. Characters are limited to those within {@link CHARACTERS}, and the
- * chance to mutate is defined in {@link MUTATION_CHANCE}.
+ * Attempts to mutate characters within a string, and the chance to mutate is defined in {@link MUTATION_CHANCE}.
  *
  * @param individual The individual to mutate.
  *
@@ -57,13 +58,13 @@ int mutate(std::string &individual) {
     for (char & c : individual) {
 
         // Generate a double within [0, 1].
-        double random = (double) rand() / (double) RAND_MAX;
+        // const double random = (double) rand() / (double) RAND_MAX;
 
         // Check to see if the value should mutate.
-        if (MUTATION_CHANCE >= random) {
+        if (MUTATION_CHANCE >= static_cast<double>(rand()) / static_cast<double>(RAND_MAX)) {
 
             // Select a random character to mutate into.
-            char mutation = CHARACTERS[rand() % CHARACTERS.length()];
+            const char mutation = random_char();
 
             // Mutate the value.
             c = mutation;
@@ -86,7 +87,7 @@ int mutate(std::string &individual) {
  *
  * @return The index of the highest scoring individual in the population.
  */
-int highest_scoring(std::vector<std::string> &population) {
+int highest_scoring(const std::vector<std::string> &population) {
 
     double highest = fitness(population[0]);
     int index = 0;
@@ -94,10 +95,8 @@ int highest_scoring(std::vector<std::string> &population) {
     // Index 0 is excluded as it is used as the default.
     for (int i = 1; i < POPULATION_SIZE; i++) {
 
-        double fitness_score = fitness(population[i]);
-
         // Check if the fitness score of the current individual is the highest.
-        if (fitness_score > highest) {
+        if (const double fitness_score = fitness(population[i]); fitness_score > highest) {
             highest = fitness_score;
             index = i;
         }
@@ -116,11 +115,13 @@ int highest_scoring(std::vector<std::string> &population) {
  */
 int main() {
 
-    // Seed the random number generator.
-    srand((unsigned) time(nullptr));
+    // Seed the random number generator. Note, this is an old and non-uniform way to generate pseudo-random numbers, and
+    // should not be used in most cases, unless it is for a proof-of-concept or similar.
+    srand(static_cast<unsigned>(time(nullptr)));
 
     // The starting value for individuals.
-    std::string current   = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+    std::string current(TARGET.length(), 0);
+    std::generate(current.begin(), current.end(), random_char);
 
     // Initializes a population.
     std::vector<std::string> population(POPULATION_SIZE);
@@ -139,9 +140,9 @@ int main() {
         std::for_each(population.begin(), population.end(), mutate);
 
         // Get the individual with the highest score.
-        int highest_scorer = highest_scoring(population);
+        const int highest_scorer = highest_scoring(population);
         std::string &value = population[highest_scorer];
-        double fitness_score = fitness(value);
+        const double fitness_score = fitness(value);
 
         // Output the individual with the peak fitness score.
         std::cout << value << "  |  " << fitness_score << std::endl;
