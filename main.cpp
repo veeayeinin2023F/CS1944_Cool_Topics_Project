@@ -111,9 +111,26 @@ int highest_scoring(const std::vector<std::string> &population) {
 /**
  * The entry-point for the program. Utilizes a genetic algorithm to mutate a random string into the target string.
  *
+ * @param argc The amount of arguments passed.
+ * @param argv The arguments passed.
+ *
  * @return The exit code.
  */
-int main() {
+int main(const int argc, const char *argv[]) {
+
+    // Should the program prompt for user input before terminating the program? This is useful is an external console
+    // is used, as the console will close after the program terminates.
+    bool pause = false;
+
+    // Stores the arguments as a vector of strings.
+    const std::vector<std::string> args(argv, argv + argc);
+
+    // Loop over each argument, except for argv[0], because the program path is in argv[0].
+    for (std::size_t i = 1; i < args.size(); i++) {
+        if (args[i] == "--pause") {
+            pause = true;
+        }
+    }
 
     // Seed the random number generator. Note, this is an old and non-uniform way to generate pseudo-random numbers, and
     // should not be used in most cases, unless it is for a proof-of-concept or similar.
@@ -158,6 +175,15 @@ int main() {
     }
 
     std::cout << "Completed in " << generation << " generations." << std::endl;
+
+    if (pause) {
+
+        // Requires the user to press 'enter' to terminate the program.
+        std::cout << "\nPlease press 'Enter' to exit." << std::endl;
+        std::cin.ignore();
+
+    }
+
     return 0;
 
 }
