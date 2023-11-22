@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
+#include <chrono>
 
 
 /// How many individuals a population should be comprised of.
@@ -147,6 +148,9 @@ int main(const int argc, const char *argv[]) {
     std::cout << "Population Size: " << POPULATION_SIZE << std::endl;
     std::cout << "Mutation Chance: " << (MUTATION_CHANCE * 100) << "%" << std::endl;
 
+    // Get the time in which the program started.
+    const auto start_time = std::chrono::high_resolution_clock::now();
+
     int generation = 0;
     for (;;) {
 
@@ -158,11 +162,11 @@ int main(const int argc, const char *argv[]) {
 
         // Get the individual with the highest score.
         const int highest_scorer = highest_scoring(population);
-        std::string &value = population[highest_scorer];
+        const std::string &value = population[highest_scorer];
         const double fitness_score = fitness(value);
 
         // Output the individual with the peak fitness score.
-        std::cout << value << "  |  " << fitness_score << std::endl;
+        std::cout << value << "  |  " << fitness_score << '\n';
 
         // If the algorithm is done, break out of the loop.
         if (fitness_score == 1) {
@@ -173,6 +177,11 @@ int main(const int argc, const char *argv[]) {
         std::fill(population.begin(), population.end(), value);
 
     }
+
+    // Calculate the total time elapsed since the program started.
+    const auto end_time = std::chrono::high_resolution_clock::now();
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    std::cout << "Time Elapsed: " << duration.count() << "ms" << std::endl;
 
     std::cout << "Completed in " << generation << " generations." << std::endl;
 
